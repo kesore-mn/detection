@@ -1,0 +1,12 @@
+#python libraries
+
+#numpy
+#tensorflow
+#mediapipe
+#moviepy
+#assemblyai--api
+#tkinter
+#opencv
+#math
+#python version above 3.8
+#

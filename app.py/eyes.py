@@ -3,6 +3,9 @@ import numpy as np
 import mediapipe as mp
 import math
 from module.utils import my_function
+import time
+start_time=time.time
+
 
 mp_face_mesh = mp.solutions.face_mesh
 RIGHT_IRIS=[474,475,476,477]
@@ -63,10 +66,8 @@ vert_pos_counts={
     "up": 0,
     "down": 0
 }
-
-
-     
 cap= cv.VideoCapture(f"{my_function()}")
+start_time = time.time()  # Start time for counting
 with mp_face_mesh.FaceMesh(
     max_num_faces=1,
     refine_landmarks=True,
@@ -97,14 +98,7 @@ with mp_face_mesh.FaceMesh(
                 cv.circle(frame,mesh_points[R_H_CENTER][0],3,(255,255,255),1,cv.LINE_AA)
                 cv.circle(frame,mesh_points[L_H_CENTER][0],3,(255,255,255),1,cv.LINE_AA)
 
-                cv.circle(frame,mesh_points[R_H_RIGHT][0],3,(255,255,255),-1,cv.LINE_AA)
-                cv.circle(frame,mesh_points[R_H_LEFT][0],3,(0,255,255),-1,cv.LINE_AA)
-                cv.circle(frame,mesh_points[L_H_RIGHT][0],3,(255,255,255),-1,cv.LINE_AA)
-                cv.circle(frame,mesh_points[L_H_LEFT][0],3,(0,255,255),-1,cv.LINE_AA)
-                cv.circle(frame,mesh_points[R_H_UP][0],3,(0,255,255),-1,cv.LINE_AA)
-                cv.circle(frame,mesh_points[R_H_DOWN][0],3,(0,255,255),-1,cv.LINE_AA)
-                cv.circle(frame, mesh_points[L_H_DOWN][0], 3, (0, 255, 255), -1, cv.LINE_AA)
-                cv.circle(frame, mesh_points[L_H_UP][0], 3, (0, 255, 255), -1, cv.LINE_AA)
+                
            
            
 
@@ -113,9 +107,16 @@ with mp_face_mesh.FaceMesh(
                 iris_pos,ratio=iris_position(center_left, mesh_points[L_H_LEFT],mesh_points[L_H_RIGHT][0])
           
                 up_dist,dist= iris_vertical_position(center_right, mesh_points[R_H_UP], mesh_points[R_H_DOWN][0])
-                 # Update counters for positions
-                position_counts[iris_pos] += 1
-                vert_pos_counts[up_dist] += 1
+                
+                if time.time() - start_time >= 3:
+                    position_counts[iris_pos] += 1
+                    vert_pos_counts[up_dist] += 1
+                    start_time = time.time()  
+
+                
+                   
+                
+
            
                 cv.putText(frame,f"Iris pos: {iris_pos} {ratio:.2f}",(30,30),cv.FONT_HERSHEY_PLAIN,1.2,(0,0,0),1,cv.LINE_AA,)
                 cv.putText(frame,f"eye: {up_dist}{dist:.2f}",(30,50),cv.FONT_HERSHEY_PLAIN,1.2,(0,0,0),1,cv.LINE_AA)
@@ -123,26 +124,61 @@ with mp_face_mesh.FaceMesh(
 
 
                 cv.imshow('img',frame)
-            key = cv.waitKey(1)
+            key = cv.waitKey(3)
             if key ==ord('q'):
                 break
         except Exception as e:
             print(f"an error occurred:{e}")
 
-            # Display the final count of occurrences for each position
+            #final count
 print("Occurrences of eye position:")
 for position, count in position_counts.items():
     print(f"{position}: {count}")
 
 print("Occurrences of eye position:")
-for position, count in vert_pos_counts.items():
-    print(f"{position}: {count}")
+for vert_pos, count in vert_pos_counts.items():
+    print(f"{vert_pos}: {count}")
 
-# Find and display the most frequent position
+
 max_position = max(position_counts, key=position_counts.get)
-print(f"The position that occurred the most: {max_position} with {position_counts[max_position]} occurrences.")
+print(f"mostly occurres right or left or center:{max_position} with {position_counts[max_position]} occurrences.")
+if count >=3 and position != max_position:
+    print(f"{position} occurs more than 3 sec: suspicious")
+else:
+    print("no susppect")
 
 v_max_pos=max(vert_pos_counts,key=vert_pos_counts.get)
-print(f"the position that occurred the most in up or down:{v_max_pos} with {vert_pos_counts[v_max_pos]} occurrences.")
+print(f"mostly occurred in up or down:{v_max_pos} with {vert_pos_counts[v_max_pos]} occurrences.")
+if count >=2 and vert_pos != v_max_pos:
+    print(f"{vert_pos} occurs more than  3 seconds: suspicious")
+else:
+    print("no suspect")
+
+count_groups = {}
+
+for position, count in position_counts.items():
+    if count in count_groups:
+        count_groups[count].append(position)
+    else:
+        count_groups[count] = [position]
+
+for count, positions in count_groups.items():
+    if len(positions) > 1 and count >=0:
+        print(f"Positions {positions} have the same count of {count}.")
+
+v_count_groups = {}
+
+
+for vert_pos, count in vert_pos_counts.items():
+    if count in v_count_groups:
+        v_count_groups[count].append(vert_pos) 
+    else:
+        v_count_groups[count] = [vert_pos]
+
+
+for count, vert_positions in v_count_groups.items():
+    if len(vert_positions) > 1 and count >= 0:
+        print(f"Vertical positions {vert_positions} have the same count of {count}.")
+
 cap.release()
 cv.destroyAllWindows()

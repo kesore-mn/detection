@@ -9,4 +9,3 @@
 #opencv
 #math
 #python version above 3.8
-#

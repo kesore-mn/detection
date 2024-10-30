@@ -3,9 +3,7 @@ import  mediapipe as mp
 import numpy as np
 from module.utils import my_function
 import time 
-
-#video_path=my_function()
-
+start_time=time.time()
 mp_face_mesh = mp.solutions.face_mesh
 face_mesh = mp_face_mesh.FaceMesh(min_detection_confidence=0.5, min_tracking_confidence=0.5)
 
@@ -16,7 +14,7 @@ drawing_spec=mp_drawing.DrawingSpec(thickness=1,circle_radius=1)
 cap=cv.VideoCapture(f"{my_function()}")
 
 
-# Dictionary to track occurrences of each head position
+# Dictionary 
 position_counts = {
     "left": 0,
     "left up": 0,
@@ -30,7 +28,7 @@ position_counts = {
 }
 
 while cap.isOpened():
-    success,image = cap.read(1)
+    success,image = cap.read()
     
     if not success:
         print("ignoring empty frame")
@@ -45,6 +43,8 @@ while cap.isOpened():
         continue
    
     results=face_mesh.process(image)
+
+    current_time=time.time()
 
    
 
@@ -101,9 +101,11 @@ while cap.isOpened():
                 text= "up"
             else:
                 text="forward"
-                  # Increment the count for the detected position
-            if text in position_counts:
-                position_counts[text] += 1
+                 
+            if current_time - start_time >= 1:  # 1 second has passed
+                if text in position_counts:
+                    position_counts[text] += 1
+                start_time = current_time  # Reset the timer
 
             try:
                 nose_3d_projection,jacobian=cv.projectPoints(nose_3d,rot_vec,trans_vec,cam_matrix,dist_matrix)
@@ -119,20 +121,39 @@ while cap.isOpened():
             cv.putText(image,"z:"+str(np.round(z,2)),(500,150),cv.FONT_HERSHEY_SIMPLEX,1,(0,0,255))
 
 
-      
        
-    cv.imshow('head pose estimation',image)
-    key = cv.waitKey(3)
-    if key ==ord('q'):
-        break
-# Display the final count of occurrences for each position
+            cv.imshow('head pose estimation',image)
+        key = cv.waitKey(3)
+        if key ==ord('q'):
+            break
+# final count of each position
 print("Occurrences of each head position:")
 for position, count in position_counts.items():
     print(f"{position}: {count}")
-
-    # Find and display the most frequent position
+    
+    # mostly occured position
 max_position = max(position_counts, key=position_counts.get)
+if count>=2 and position !=max_position:
+    print(f"{position} occurs more than  3 seconds: suspicious")    
+else:
+    print("no suspect")
 print(f"The position that occurred the most: {max_position} with {position_counts[max_position]} occurrences.")
+
+count_groups = {}
+
+for position, count in position_counts.items():
+    if count in count_groups:
+        count_groups[count].append(position)
+    else:
+        count_groups[count] = [position]
+
+# more than one count checking
+for count, positions in count_groups.items():
+    if len(positions) > 1 and count>1 :
+        print(f"Positions {positions} have the same count of {count}.")
+
+
+
 
 
 cap.release()

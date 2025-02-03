@@ -1,0 +1,9 @@
+tkinter
+moviepy
+pvfalcon
+pvleopard
+difflib
+opencv-python
+numpy
+mediapipe
+deepface

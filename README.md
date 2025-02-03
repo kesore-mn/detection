@@ -18,6 +18,35 @@ opencv-python
 numpy
 mediapipe
 deepface
+```
+## Usage
+Clone the repository:
 
+```bash
+Copy
+Edit
+git clone https://github.com/kesore-mn/online_interview-behavioural_analysis.git
+Navigate to the project directory:
+```
+## Navigate to the project directory:
 
-
+```bash
+Copy
+Edit
+cd online_interview-behavioural_analysis
+Run the main analysis script:
+```
+```bash
+Copy
+Edit
+python main.py
+```
+## System Requirements
+Python version: Python 3.x
+Operating System: Windows, macOS, or Linux
+## Hardware Requirements:
+A system capable of running Python and the aforementioned libraries.
+A camera (for video processing, emotion detection, and pose estimation).
+Sufficient RAM and CPU power for real-time video and emotion detection.
+## APIs Used
+pvfalcon and pvleopard APIs: For transcription and diarization.

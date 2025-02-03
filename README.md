@@ -23,22 +23,16 @@ deepface
 Clone the repository:
 
 ```bash
-Copy
-Edit
 git clone https://github.com/kesore-mn/online_interview-behavioural_analysis.git
 Navigate to the project directory:
 ```
 ## Navigate to the project directory:
 
 ```bash
-Copy
-Edit
 cd online_interview-behavioural_analysis
 Run the main analysis script:
 ```
 ```bash
-Copy
-Edit
 python main.py
 ```
 ## System Requirements
